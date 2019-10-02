@@ -14,3 +14,12 @@ static const int failonclear = 1;
 
 /* allow control key to trigger fail on clear */
 static const int controlkeyclear = 0;
+
+/* default message */
+static const char * message = "Suckless: Software that sucks less.";
+
+/* text color */
+static const char * text_color = "#ffffff";
+
+/* text size (must be a valid size) */
+static const char * font_name = "6x10";
