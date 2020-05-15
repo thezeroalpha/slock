@@ -156,6 +156,22 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 			    IsPFKey(ksym) ||
 			    IsPrivateKeypadKey(ksym))
 				continue;
+			if (ev.xkey.state & ControlMask) {
+				switch (ksym) {
+				case XK_u:
+					ksym = XK_Escape;
+					break;
+				case XK_m:
+					ksym = XK_Return;
+					break;
+				case XK_j:
+					ksym = XK_Return;
+					break;
+				case XK_h:
+                                       ksym = XK_BackSpace;
+					break;
+				}
+			}
 			switch (ksym) {
 			case XK_Return:
 				passwd[len] = '\0';
