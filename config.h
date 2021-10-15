@@ -19,3 +19,11 @@ static const int blurRadius=9;
 //#define PIXELATION
 /*Set pixelation radius*/
 static const int pixelSize=0;
+/* default message */
+static const char * message = "Locked.";
+
+/* text color */
+static const char * text_color = "#ffffff";
+
+/* text size (must be a valid size) */
+static const char * font_name = "lucidasans-18";
