@@ -4,7 +4,7 @@
 #if HAVE_SHADOW_H
 #include <shadow.h>
 #endif
-
+#include <X11/Xmd.h>
 #include <ctype.h>
 #include <errno.h>
 #include <grp.h>
@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <X11/extensions/Xrandr.h>
+#include <X11/extensions/dpms.h>
 #ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
@@ -494,6 +495,8 @@ main(int argc, char **argv) {
 	int i, s, nlocks, nscreens;
 	int count_fonts;
 	char **font_names;
+	CARD16 standby, suspend, off;
+	BOOL dpms_state;
 
 	ARGBEGIN {
 	case 'v':
@@ -622,6 +625,23 @@ main(int argc, char **argv) {
 	if (nlocks != nscreens)
 		return 1;
 
+	/* DPMS magic to disable the monitor */
+	if (!DPMSCapable(dpy))
+		die("slock: DPMSCapable failed\n");
+	if (!DPMSInfo(dpy, &standby, &dpms_state))
+		die("slock: DPMSInfo failed\n");
+	if (!DPMSEnable(dpy) && !dpms_state)
+		die("slock: DPMSEnable failed\n");
+	if (!DPMSGetTimeouts(dpy, &standby, &suspend, &off))
+		die("slock: DPMSGetTimeouts failed\n");
+	if (!standby || !suspend || !off)
+		die("slock: at least one DPMS variable is zero\n");
+	if (!DPMSSetTimeouts(dpy, monitortime, monitortime, monitortime))
+		die("slock: DPMSSetTimeouts failed\n");
+
+	XSync(dpy, 0);
+
+
 	/* run post-lock command */
 	if (argc > 0) {
 		switch (fork()) {
@@ -644,7 +664,12 @@ main(int argc, char **argv) {
 		XFreeGC(dpy, locks[s]->gc);
 	}
 
+	/* reset DPMS values to inital ones */
+	DPMSSetTimeouts(dpy, standby, suspend, off);
+	if (!dpms_state)
+		DPMSDisable(dpy);
 	XSync(dpy, 0);
+
 	XCloseDisplay(dpy);
 
 	return 0;
