@@ -316,16 +316,14 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					passwd[--len] = '\0';
 				break;
 			default:
-				// if (num && !iscntrl((int)buf[0]) &&
-				//     (len + num < sizeof(passwd))) {
 				if (ksym == XK_u && ev.xkey.state & ControlMask) {
-					printf("Clearing!\n");
 					explicit_bzero(&passwd, sizeof(passwd));
+					failure = 0;
 					len = 0;
-					continue;
+					break;
 				}
 				if (controlkeyclear && iscntrl((int)buf[0]))
-						continue;
+					continue;
 				if (num && (len + num < sizeof(passwd))) {
 					memcpy(passwd + len, buf, num);
 					len += num;
@@ -333,7 +331,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				break;
 			}
 			color = len ? (len%2 ? INPUT : INPUT_ALT)
-			            : ((failure || failonclear) ? FAILED : INIT);
+						: ((failure || failonclear) ? FAILED : INIT);
 			if (running && oldc != color) {
 				for (screen = 0; screen < nscreens; screen++) {
 					drawlogo(dpy, locks[screen], color);
